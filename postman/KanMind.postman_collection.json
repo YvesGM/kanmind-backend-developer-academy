@@ -1,9 +1,29 @@
 {
   "info": {
-    "_postman_id": "f87da36f-cb4f-4e64-a825-9e9cb76f9d99",
-    "name": "KanMind - Current Backend",
-    "description": "Current CRUD API for Boards, Tasks and Comments.",
+    "_postman_id": "e406cb25-8826-4373-9a36-kanmind-foundation",
+    "name": "KanMind - Academy Foundation",
+    "description": "Authentication, permissions, boards, tasks, comments and negative tests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "Authorization",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "Token {{token}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
     {
@@ -11,12 +31,8 @@
       "value": "http://127.0.0.1:8000/api"
     },
     {
-      "key": "ownerId",
-      "value": "1"
-    },
-    {
-      "key": "memberId",
-      "value": "2"
+      "key": "token",
+      "value": ""
     },
     {
       "key": "boardId",
@@ -29,9 +45,137 @@
     {
       "key": "commentId",
       "value": "1"
+    },
+    {
+      "key": "memberId",
+      "value": "2"
+    },
+    {
+      "key": "email",
+      "value": "kanmind-owner@example.com"
+    },
+    {
+      "key": "password",
+      "value": "SecureExamplePassword123!"
     }
   ],
   "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/registration/",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"{{password}}\",\\n  \"repeated_password\": \"{{password}}\"\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/login/",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"{{password}}\"\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Email Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/email-check/",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"{{email}}\"\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/logout/"
+          }
+        }
+      ]
+    },
     {
       "name": "Boards",
       "item": [
@@ -45,20 +189,6 @@
         },
         {
           "name": "Create Board",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  const body = pm.response.json();",
-                  "  pm.collectionVariables.set('boardId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "POST",
             "header": [
@@ -67,17 +197,31 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/boards/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"title\\\": \\\"KanMind Testboard\\\",\\n  \\\"owner\\\": {{ownerId}},\\n  \\\"members\\\": [{{ownerId}}, {{memberId}}]\\n}",
+              "raw": "{\\n  \"title\": \"KanMind Testboard\",\\n  \"members\": []\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/boards/"
-          }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.id) pm.collectionVariables.set('boardId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Board",
@@ -97,16 +241,16 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/boards/{{boardId}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"title\\\": \\\"KanMind Backend Board\\\"\\n}",
+              "raw": "{\\n  \"title\": \"KanMind Backend Board\"\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/boards/{{boardId}}/"
+            }
           }
         },
         {
@@ -131,21 +275,15 @@
           }
         },
         {
+          "name": "Filter Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tasks/?board={{boardId}}&status=to-do&priority=high"
+          }
+        },
+        {
           "name": "Create Task",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  const body = pm.response.json();",
-                  "  pm.collectionVariables.set('taskId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "POST",
             "header": [
@@ -154,17 +292,31 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/tasks/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"title\\\": \\\"Implement login\\\",\\n  \\\"description\\\": \\\"Build the authentication endpoint\\\",\\n  \\\"board\\\": {{boardId}},\\n  \\\"assignee\\\": {{ownerId}},\\n  \\\"reviewer\\\": {{memberId}},\\n  \\\"status\\\": \\\"to-do\\\",\\n  \\\"priority\\\": \\\"high\\\",\\n  \\\"due_date\\\": \\\"2026-11-20\\\"\\n}",
+              "raw": "{\\n  \"title\": \"Implement login\",\\n  \"description\": \"Build the authentication endpoint\",\\n  \"board\": {{boardId}},\\n  \"assignee\": null,\\n  \"reviewer\": null,\\n  \"status\": \"to-do\",\\n  \"priority\": \"high\",\\n  \"due_date\": \"2026-11-20\"\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/tasks/"
-          }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.id) pm.collectionVariables.set('taskId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Task",
@@ -175,7 +327,7 @@
           }
         },
         {
-          "name": "Move Task to In Progress",
+          "name": "Move Task",
           "request": {
             "method": "PATCH",
             "header": [
@@ -184,38 +336,16 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/tasks/{{taskId}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"status\\\": \\\"in-progress\\\"\\n}",
+              "raw": "{\\n  \"status\": \"in-progress\"\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
-          }
-        },
-        {
-          "name": "Patch Task Assignment",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \\\"assignee\\\": {{memberId}},\\n  \\\"reviewer\\\": {{ownerId}}\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
+            }
           }
         },
         {
@@ -240,21 +370,15 @@
           }
         },
         {
+          "name": "Filter Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/comments/?task={{taskId}}"
+          }
+        },
+        {
           "name": "Create Comment",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  const body = pm.response.json();",
-                  "  pm.collectionVariables.set('commentId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "POST",
             "header": [
@@ -263,17 +387,31 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/comments/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"task\\\": {{taskId}},\\n  \\\"author\\\": {{ownerId}},\\n  \\\"content\\\": \\\"Implementation has started.\\\"\\n}",
+              "raw": "{\\n  \"task\": {{taskId}},\\n  \"content\": \"Implementation has started.\"\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/comments/"
-          }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.id) pm.collectionVariables.set('commentId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Comment",
@@ -293,16 +431,16 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/comments/{{commentId}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"content\\\": \\\"Implementation has started and the first endpoint is working.\\\"\\n}",
+              "raw": "{\\n  \"content\": \"Updated comment.\"\\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            },
-            "url": "{{baseUrl}}/comments/{{commentId}}/"
+            }
           }
         },
         {
@@ -319,55 +457,58 @@
       "name": "Negative Tests",
       "item": [
         {
-          "name": "Unknown Board -> 404",
+          "name": "Invalid Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/login/",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"wrong-password\"\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Invalid Task Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tasks/{{taskId}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"status\": \"banana\"\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unknown Board",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/boards/999999/"
-          }
-        },
-        {
-          "name": "Invalid Task Status -> 400",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \\\"status\\\": \\\"banana\\\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
-          }
-        },
-        {
-          "name": "Invalid Task Priority -> 400",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \\\"priority\\\": \\\"critical\\\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
           }
         }
       ]
