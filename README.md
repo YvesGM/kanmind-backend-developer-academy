@@ -99,6 +99,10 @@ API base URL:
 http://127.0.0.1:8000/api/
 ```
 
+The supplied frontend is started with Live Server and therefore runs on a
+different origin. CORS responses are enabled while Django runs with
+`DEBUG=True`; production deployments should configure explicit origins.
+
 ## Authentication
 
 KanMind uses DRF token authentication.
