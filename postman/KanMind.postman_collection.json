@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "e406cb25-8826-4373-9a36-kanmind-foundation",
+    "_postman_id": "e406cb25-8826-4373-9a36-kanmind-final",
     "name": "Developer Academy",
-    "description": "Developer Academy API collection.",
+    "description": "Developer Academy API collection with KanMind as a folder.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -15,28 +15,48 @@
       "value": ""
     },
     {
-      "key": "boardId",
-      "value": "1"
+      "key": "ownerToken",
+      "value": ""
     },
     {
-      "key": "taskId",
-      "value": "1"
+      "key": "memberToken",
+      "value": ""
     },
     {
-      "key": "commentId",
-      "value": "1"
+      "key": "ownerId",
+      "value": ""
     },
     {
       "key": "memberId",
-      "value": "2"
+      "value": ""
     },
     {
-      "key": "email",
-      "value": "kanmind-owner@example.com"
+      "key": "boardId",
+      "value": ""
     },
     {
-      "key": "password",
-      "value": "SecureExamplePassword123!"
+      "key": "taskId",
+      "value": ""
+    },
+    {
+      "key": "commentId",
+      "value": ""
+    },
+    {
+      "key": "ownerEmail",
+      "value": "owner@example.com"
+    },
+    {
+      "key": "ownerPassword",
+      "value": "StrongPassword123!"
+    },
+    {
+      "key": "memberEmail",
+      "value": "member@example.com"
+    },
+    {
+      "key": "memberPassword",
+      "value": "StrongPassword123!"
     }
   ],
   "item": [
@@ -50,10 +70,7 @@
             "exec": [
               "const token = pm.collectionVariables.get('token');",
               "if (token) {",
-              "  pm.request.headers.upsert({",
-              "    key: 'Authorization',",
-              "    value: 'Token ' + token",
-              "  });",
+              "  pm.request.headers.upsert({ key: 'Authorization', value: 'Token ' + token });",
               "}"
             ]
           }
@@ -64,7 +81,7 @@
           "name": "Authentication",
           "item": [
             {
-              "name": "Registration",
+              "name": "Register Owner",
               "request": {
                 "method": "POST",
                 "header": [
@@ -79,7 +96,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"repeated_password\": \"{{password}}\"\n}",
+                  "raw": "{\n  \"fullname\": \"Owner User\",\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\",\n  \"repeated_password\": \"{{ownerPassword}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -102,9 +119,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "if (pm.response.code === 201) {",
                       "  const body = pm.response.json();",
-                      "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                      "  pm.collectionVariables.set('ownerId', body.user_id);",
+                      "  pm.collectionVariables.set('ownerToken', body.token);",
+                      "  pm.collectionVariables.set('token', body.token);",
                       "}"
                     ]
                   }
@@ -112,7 +131,57 @@
               ]
             },
             {
-              "name": "Login",
+              "name": "Register Member",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/registration/",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullname\": \"Member User\",\n  \"email\": \"{{memberEmail}}\",\n  \"password\": \"{{memberPassword}}\",\n  \"repeated_password\": \"{{memberPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.request.headers.remove('Authorization');"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('memberId', body.user_id);",
+                      "  pm.collectionVariables.set('memberToken', body.token);",
+                      "  pm.collectionVariables.set('token', body.token);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Login Owner",
               "request": {
                 "method": "POST",
                 "header": [
@@ -127,7 +196,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -150,9 +219,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "if (pm.response.code === 200) {",
                       "  const body = pm.response.json();",
-                      "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                      "  pm.collectionVariables.set('ownerId', body.user_id);",
+                      "  pm.collectionVariables.set('ownerToken', body.token);",
+                      "  pm.collectionVariables.set('token', body.token);",
                       "}"
                     ]
                   }
@@ -160,47 +231,11 @@
               ]
             },
             {
-              "name": "Email Check",
+              "name": "Email Check Member",
               "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{baseUrl}}/email-check/",
-                "auth": {
-                  "type": "noauth"
-                },
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "event": [
-                {
-                  "listen": "prerequest",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.request.headers.remove('Authorization');"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Logout",
-              "request": {
-                "method": "POST",
+                "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/logout/"
+                "url": "{{baseUrl}}/email-check/?email={{memberEmail}}"
               }
             }
           ]
@@ -229,7 +264,7 @@
                 "url": "{{baseUrl}}/boards/",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"KanMind Testboard\",\n  \"members\": []\n}",
+                  "raw": "{\n  \"title\": \"KanMind Testboard\",\n  \"members\": [\n    \"{{memberId}}\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -243,9 +278,9 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "if (pm.response.code === 201) {",
                       "  const body = pm.response.json();",
-                      "  if (body.id) pm.collectionVariables.set('boardId', body.id);",
+                      "  pm.collectionVariables.set('boardId', body.id);",
                       "}"
                     ]
                   }
@@ -273,7 +308,7 @@
                 "url": "{{baseUrl}}/boards/{{boardId}}/",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"KanMind Backend Board\"\n}",
+                  "raw": "{\n  \"title\": \"Changed title\",\n  \"members\": [\n    \"{{memberId}}\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -296,22 +331,6 @@
           "name": "Tasks",
           "item": [
             {
-              "name": "List Tasks",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/tasks/"
-              }
-            },
-            {
-              "name": "Filter Tasks",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/tasks/?board={{boardId}}&status=to-do&priority=high"
-              }
-            },
-            {
               "name": "Create Task",
               "request": {
                 "method": "POST",
@@ -324,7 +343,7 @@
                 "url": "{{baseUrl}}/tasks/",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Implement login\",\n  \"description\": \"Build the authentication endpoint\",\n  \"board\": \"{{boardId}}\",\n  \"assignee\": null,\n  \"reviewer\": null,\n  \"status\": \"to-do\",\n  \"priority\": \"high\",\n  \"due_date\": \"2026-11-20\"\n}",
+                  "raw": "{\n  \"board\": \"{{boardId}}\",\n  \"title\": \"Code review\",\n  \"description\": \"Review the new pull request\",\n  \"status\": \"review\",\n  \"priority\": \"medium\",\n  \"assignee_id\": \"{{memberId}}\",\n  \"reviewer_id\": \"{{ownerId}}\",\n  \"due_date\": \"2026-12-15\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -338,9 +357,9 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "if (pm.response.code === 201) {",
                       "  const body = pm.response.json();",
-                      "  if (body.id) pm.collectionVariables.set('taskId', body.id);",
+                      "  pm.collectionVariables.set('taskId', body.id);",
                       "}"
                     ]
                   }
@@ -348,15 +367,23 @@
               ]
             },
             {
-              "name": "Get Task",
+              "name": "Assigned To Me",
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/tasks/{{taskId}}/"
+                "url": "{{baseUrl}}/tasks/assigned-to-me/"
               }
             },
             {
-              "name": "Move Task",
+              "name": "Reviewing",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/tasks/reviewing/"
+              }
+            },
+            {
+              "name": "Patch Task",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -368,7 +395,7 @@
                 "url": "{{baseUrl}}/tasks/{{taskId}}/",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"status\": \"in-progress\"\n}",
+                  "raw": "{\n  \"title\": \"Code review finished\",\n  \"description\": \"Review completed\",\n  \"status\": \"done\",\n  \"priority\": \"high\",\n  \"assignee_id\": \"{{memberId}}\",\n  \"reviewer_id\": \"{{ownerId}}\",\n  \"due_date\": \"2026-12-16\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -395,15 +422,7 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/comments/"
-              }
-            },
-            {
-              "name": "Filter Comments",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/comments/?task={{taskId}}"
+                "url": "{{baseUrl}}/tasks/{{taskId}}/comments/"
               }
             },
             {
@@ -416,10 +435,10 @@
                     "value": "application/json"
                   }
                 ],
-                "url": "{{baseUrl}}/comments/",
+                "url": "{{baseUrl}}/tasks/{{taskId}}/comments/",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"task\": \"{{taskId}}\",\n  \"content\": \"Implementation has started.\"\n}",
+                  "raw": "{\n  \"content\": \"This is a task comment.\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -433,9 +452,9 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "if (pm.response.code === 201) {",
                       "  const body = pm.response.json();",
-                      "  if (body.id) pm.collectionVariables.set('commentId', body.id);",
+                      "  pm.collectionVariables.set('commentId', body.id);",
                       "}"
                     ]
                   }
@@ -443,41 +462,11 @@
               ]
             },
             {
-              "name": "Get Comment",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/comments/{{commentId}}/"
-              }
-            },
-            {
-              "name": "Patch Comment",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{baseUrl}}/comments/{{commentId}}/",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"content\": \"Updated comment.\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              }
-            },
-            {
               "name": "Delete Comment",
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/comments/{{commentId}}/"
+                "url": "{{baseUrl}}/tasks/{{taskId}}/comments/{{commentId}}/"
               }
             }
           ]
@@ -501,7 +490,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password\"\n}",
+                  "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"wrong-password\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -520,6 +509,22 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "Missing Email Query",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/email-check/"
+              }
+            },
+            {
+              "name": "Unknown Board",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/boards/999999/"
+              }
             },
             {
               "name": "Invalid Task Status",
@@ -544,11 +549,25 @@
               }
             },
             {
-              "name": "Unknown Board",
+              "name": "Attempt Task Board Change",
               "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/boards/999999/"
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/tasks/{{taskId}}/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"board\": \"{{boardId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               }
             }
           ]
