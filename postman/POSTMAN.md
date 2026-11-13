@@ -1,205 +1,190 @@
-# KanMind Postman Sheet
+# KanMind Postman Guide
 
-Current implementation only; not yet the final Academy contract.
+The collection mirrors the official KanMind endpoint contract.
 
-## Variables
+## Import
+
+Import:
 
 ```text
-{{baseUrl}} = http://127.0.0.1:8000/api
-{{ownerId}} = 1
-{{memberId}} = 2
-{{boardId}} = 1
-{{taskId}} = 1
-{{commentId}} = 1
+postman/KanMind.postman_collection.json
 ```
 
-## Recommended order
+Expected hierarchy:
 
-1. Verify/create users in Django Admin.
-2. Create Board.
-3. List/Get/Patch Board.
-4. Create Task.
-5. List/Get/Patch Task.
-6. Create Comment.
-7. List/Get/Patch Comment.
-8. Delete Comment, Task, Board.
+```text
+Developer Academy
+└── KanMind
+    ├── Authentication
+    ├── Boards
+    ├── Tasks
+    ├── Comments
+    └── Negative Tests
+```
 
-## Boards
+## Collection Variables
 
-### GET list
-`GET {{baseUrl}}/boards/`
+```text
+baseUrl       http://127.0.0.1:8000/api
+token         current authentication token
+ownerEmail    owner@example.com
+ownerPassword StrongPassword123!
+memberEmail   member@example.com
+memberPassword StrongPassword123!
+ownerId       set automatically
+memberId      set automatically
+boardId       set automatically
+taskId        set automatically
+commentId     set automatically
+```
 
-Expected: `200 OK`
+The KanMind folder injects:
 
-### POST create
-`POST {{baseUrl}}/boards/`
+```text
+Authorization: Token {{token}}
+```
+
+Registration and login remove this header before sending the request.
+
+## Recommended Run Order
+
+1. Register Owner
+2. Register Member
+3. Login Owner
+4. Email Check Member
+5. Create Board
+6. List Boards
+7. Get Board
+8. Patch Board
+9. Create Task
+10. Assigned To Me
+11. Reviewing
+12. Patch Task
+13. Create Comment
+14. List Comments
+15. Delete Comment
+16. Delete Task
+17. Delete Board
+18. Run Negative Tests
+
+## Official Endpoints
+
+### Authentication
+
+```text
+POST /registration/
+POST /login/
+GET  /email-check/?email=<email>
+```
+
+### Boards
+
+```text
+GET    /boards/
+POST   /boards/
+GET    /boards/{{boardId}}/
+PATCH  /boards/{{boardId}}/
+DELETE /boards/{{boardId}}/
+```
+
+### Tasks
+
+```text
+POST   /tasks/
+PATCH  /tasks/{{taskId}}/
+DELETE /tasks/{{taskId}}/
+GET    /tasks/assigned-to-me/
+GET    /tasks/reviewing/
+```
+
+### Comments
+
+```text
+GET    /tasks/{{taskId}}/comments/
+POST   /tasks/{{taskId}}/comments/
+DELETE /tasks/{{taskId}}/comments/{{commentId}}/
+```
+
+## Request Shapes
+
+### Registration
+
+```json
+{
+  "fullname": "Owner User",
+  "email": "{{ownerEmail}}",
+  "password": "{{ownerPassword}}",
+  "repeated_password": "{{ownerPassword}}"
+}
+```
+
+### Create Board
 
 ```json
 {
   "title": "KanMind Testboard",
-  "owner": {{ownerId}},
-  "members": [{{ownerId}}, {{memberId}}]
+  "members": [{{memberId}}]
 }
 ```
 
-Expected: `201 Created`
-
-### GET detail
-`GET {{baseUrl}}/boards/{{boardId}}/`
-
-Expected: `200 OK`, unknown ID: `404 Not Found`
-
-### PATCH
-`PATCH {{baseUrl}}/boards/{{boardId}}/`
+### Patch Board
 
 ```json
 {
-  "title": "KanMind Backend Board"
+  "title": "Changed title",
+  "members": [{{memberId}}]
 }
 ```
 
-Expected: `200 OK`
-
-### DELETE
-`DELETE {{baseUrl}}/boards/{{boardId}}/`
-
-Expected: `204 No Content`
-
-## Tasks
-
-### GET list
-`GET {{baseUrl}}/tasks/`
-
-Expected: `200 OK`
-
-### POST create
-`POST {{baseUrl}}/tasks/`
+### Create Task
 
 ```json
 {
-  "title": "Implement login",
-  "description": "Build the authentication endpoint",
   "board": {{boardId}},
-  "assignee": {{ownerId}},
-  "reviewer": {{memberId}},
-  "status": "to-do",
+  "title": "Code review",
+  "description": "Review the new pull request",
+  "status": "review",
+  "priority": "medium",
+  "assignee_id": {{memberId}},
+  "reviewer_id": {{ownerId}},
+  "due_date": "2026-12-15"
+}
+```
+
+### Patch Task
+
+Do not send `board` during PATCH.
+
+```json
+{
+  "title": "Code review finished",
+  "status": "done",
   "priority": "high",
-  "due_date": "2026-11-20"
+  "assignee_id": {{memberId}},
+  "reviewer_id": {{ownerId}},
+  "due_date": "2026-12-16"
 }
 ```
 
-Expected: `201 Created`
-
-Allowed status: `to-do`, `in-progress`, `review`, `done`
-
-Allowed priority: `low`, `medium`, `high`
-
-### GET detail
-`GET {{baseUrl}}/tasks/{{taskId}}/`
-
-### PATCH move
-`PATCH {{baseUrl}}/tasks/{{taskId}}/`
+### Create Comment
 
 ```json
 {
-  "status": "in-progress"
+  "content": "This is a task comment."
 }
 ```
 
-### PATCH assignment
+## Important Permission Tests
 
-```json
-{
-  "assignee": {{memberId}},
-  "reviewer": {{ownerId}}
-}
-```
+Verify at least:
 
-### DELETE
-`DELETE {{baseUrl}}/tasks/{{taskId}}/`
-
-Expected: `204 No Content`
-
-## Comments
-
-### GET list
-`GET {{baseUrl}}/comments/`
-
-### POST create
-`POST {{baseUrl}}/comments/`
-
-```json
-{
-  "task": {{taskId}},
-  "author": {{ownerId}},
-  "content": "Implementation has started."
-}
-```
-
-Expected: `201 Created`
-
-### GET detail
-`GET {{baseUrl}}/comments/{{commentId}}/`
-
-### PATCH
-`PATCH {{baseUrl}}/comments/{{commentId}}/`
-
-```json
-{
-  "content": "Implementation has started and the first endpoint is working."
-}
-```
-
-### DELETE
-`DELETE {{baseUrl}}/comments/{{commentId}}/`
-
-Expected: `204 No Content`
-
-## Negative tests
-
-Unknown board:
-
-`GET {{baseUrl}}/boards/999999/` → `404`
-
-Invalid status:
-
-```json
-{
-  "status": "banana"
-}
-```
-
-→ `400`
-
-Invalid priority:
-
-```json
-{
-  "priority": "critical"
-}
-```
-
-→ `400` with the current model.
-
-Invalid relation:
-
-```json
-{
-  "title": "Broken relation test",
-  "board": 999999
-}
-```
-
-→ `400`
-
-## Current limitations
-
-Not implemented yet:
-
-- authentication
-- authorization/permissions
-- automatic `request.user`
-- board-member validation
-- assigned-to-me/reviewing
-- email check
-- guest login
+- unauthenticated protected request → 401
+- board outsider → 403/404 according to resource visibility
+- board member may PATCH board
+- board member may not DELETE board
+- non-member cannot become assignee/reviewer
+- task board cannot be changed by PATCH
+- board member who is neither creator nor owner cannot DELETE task
+- non-author cannot DELETE comment
+- unknown resources → 404
+- invalid status/priority → 400
