@@ -112,16 +112,11 @@ class BoardCreateSerializer(serializers.ModelSerializer):
         fields = ['title', 'members']
 
 
-class TaskPersonMixin(serializers.Serializer):
-    """Provide nested assignee and reviewer representations."""
+class TaskBoardSerializer(serializers.ModelSerializer):
+    """Serialize tasks embedded in board details."""
 
     assignee = UserSummarySerializer(read_only=True)
     reviewer = UserSummarySerializer(read_only=True)
-
-
-class TaskBoardSerializer(TaskPersonMixin, serializers.ModelSerializer):
-    """Serialize tasks embedded in board details."""
-
     comments_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -209,9 +204,11 @@ class TaskWriteSerializer(serializers.ModelSerializer):
             )
 
 
-class TaskDashboardSerializer(TaskPersonMixin, serializers.ModelSerializer):
+class TaskDashboardSerializer(serializers.ModelSerializer):
     """Serialize task create and dashboard responses."""
 
+    assignee = UserSummarySerializer(read_only=True)
+    reviewer = UserSummarySerializer(read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -222,8 +219,11 @@ class TaskDashboardSerializer(TaskPersonMixin, serializers.ModelSerializer):
         ]
 
 
-class TaskUpdateResponseSerializer(TaskPersonMixin, serializers.ModelSerializer):
+class TaskUpdateResponseSerializer(serializers.ModelSerializer):
     """Serialize the task PATCH response."""
+
+    assignee = UserSummarySerializer(read_only=True)
+    reviewer = UserSummarySerializer(read_only=True)
 
     class Meta:
         model = Task
