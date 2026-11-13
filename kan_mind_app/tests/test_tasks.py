@@ -55,3 +55,11 @@ class TaskAPITests(KanMindAPITestCase):
         self.authenticate(self.member)
         response = self.client.delete(f'/api/tasks/{task.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_outsider_gets_forbidden_for_existing_task(self):
+        task = self.create_task()
+        self.authenticate(self.outsider)
+        response = self.client.patch(
+            f'/api/tasks/{task.id}/', {'status': 'done'}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
