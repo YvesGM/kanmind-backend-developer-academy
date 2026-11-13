@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from ..models import Board, Comment, Task
@@ -44,7 +43,6 @@ class RegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'repeated_password': 'Passwords do not match.'}
             )
-        validate_password(attrs['password'])
         return attrs
 
     def create(self, validated_data):
