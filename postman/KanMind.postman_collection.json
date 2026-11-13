@@ -2,28 +2,8 @@
   "info": {
     "_postman_id": "e406cb25-8826-4373-9a36-kanmind-foundation",
     "name": "KanMind - Academy Foundation",
-    "description": "Authentication, permissions, boards, tasks, comments and negative tests.",
+    "description": "KanMind Academy Foundation. Token authentication is injected dynamically by a pre-request script to avoid Postman Vault/secret-import prompts.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "auth": {
-    "type": "apikey",
-    "apikey": [
-      {
-        "key": "key",
-        "value": "Authorization",
-        "type": "string"
-      },
-      {
-        "key": "value",
-        "value": "Token {{token}}",
-        "type": "string"
-      },
-      {
-        "key": "in",
-        "value": "header",
-        "type": "string"
-      }
-    ]
   },
   "variable": [
     {
@@ -89,6 +69,15 @@
           },
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.request.headers.remove('Authorization');"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -128,6 +117,15 @@
           },
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.request.headers.remove('Authorization');"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -164,7 +162,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.request.headers.remove('Authorization');"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Logout",
@@ -512,6 +521,23 @@
           }
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.collectionVariables.get('token');",
+          "if (token) {",
+          "  pm.request.headers.upsert({",
+          "    key: 'Authorization',",
+          "    value: 'Token ' + token",
+          "  });",
+          "}"
+        ]
+      }
     }
   ]
 }
