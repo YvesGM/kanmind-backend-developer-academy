@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import Board, Comment, Task
@@ -7,7 +8,7 @@ User = get_user_model()
 
 
 class UserSummarySerializer(serializers.ModelSerializer):
-    """Serialize the public user fields required by API responses."""
+    """Serialize public user fields required by API responses."""
 
     class Meta:
         model = User
@@ -18,7 +19,7 @@ class RegistrationSerializer(serializers.Serializer):
     """Validate and create a user using the email address as login name."""
 
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True)
     repeated_password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
@@ -31,6 +32,7 @@ class RegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'repeated_password': 'Passwords do not match.'}
             )
+        validate_password(attrs['password'])
         return attrs
 
     def create(self, validated_data):
@@ -77,7 +79,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    """Serialize tasks and validate board-related user assignments."""
+    """Serialize tasks and validate board-related assignments."""
 
     class Meta:
         model = Task
@@ -101,8 +103,10 @@ class TaskSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and board and not self._can_access_board(request.user, board):
             raise serializers.ValidationError({'board': 'Board access denied.'})
-        self._validate_board_user(attrs.get('assignee'), board, 'assignee')
-        self._validate_board_user(attrs.get('reviewer'), board, 'reviewer')
+        assignee = attrs.get('assignee', getattr(self.instance, 'assignee', None))
+        reviewer = attrs.get('reviewer', getattr(self.instance, 'reviewer', None))
+        self._validate_board_user(assignee, board, 'assignee')
+        self._validate_board_user(reviewer, board, 'reviewer')
         return attrs
 
     @staticmethod
