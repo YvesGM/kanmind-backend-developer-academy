@@ -38,3 +38,8 @@ class BoardAPITests(KanMindAPITestCase):
     def test_owner_can_delete_board(self):
         response = self.client.delete(f'/api/boards/{self.board.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_outsider_gets_forbidden_for_existing_board(self):
+        self.authenticate(self.outsider)
+        response = self.client.get(f'/api/boards/{self.board.id}/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
