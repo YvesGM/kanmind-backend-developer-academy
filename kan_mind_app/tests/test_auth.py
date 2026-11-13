@@ -44,3 +44,10 @@ class AuthenticationTests(APITestCase):
         response = self.client.get('/api/email-check/?email=u@mail.de')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], user.id)
+
+    def test_email_check_rejects_invalid_email(self):
+        user = User.objects.create_user(username='u2@mail.de', email='u2@mail.de')
+        token = Token.objects.create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+        response = self.client.get('/api/email-check/?email=invalid')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
