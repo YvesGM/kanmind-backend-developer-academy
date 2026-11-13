@@ -18,14 +18,8 @@ class TaskAdmin(admin.ModelAdmin):
     """Configure task administration."""
 
     list_display = (
-        'id',
-        'title',
-        'board',
-        'status',
-        'priority',
-        'assignee',
-        'reviewer',
-        'due_date',
+        'id', 'title', 'board', 'creator', 'status',
+        'priority', 'assignee', 'reviewer', 'due_date',
     )
     list_filter = ('status', 'priority', 'board')
     search_fields = ('title', 'description')
