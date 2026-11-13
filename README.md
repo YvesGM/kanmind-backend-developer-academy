@@ -1,8 +1,6 @@
 # KanMind Backend
 
-KanMind is a Django REST Framework backend for a Kanban-style task management application developed as part of the Developer Akademie backend course.
-
-> **Current status:** Academy foundation. The backend already provides models, serializers, generic API views, token authentication, permissions, query filtering, admin configuration, and Postman documentation. Academy-specific response contracts will be aligned after the official KanMind project specification is reviewed.
+KanMind is the Django REST Framework backend for the Developer Akademie KanMind project. It implements the API contract consumed by the supplied KanMind frontend.
 
 ## Tech Stack
 
@@ -10,203 +8,269 @@ KanMind is a Django REST Framework backend for a Kanban-style task management ap
 - Django 5.2
 - Django REST Framework 3.18
 - DRF Token Authentication
-- SQLite
-- Postman
+- SQLite for local development
+- Postman for API verification
 
-## Implemented Foundation
-
-### Domain models
-
-- `Board`
-- `Task`
-- `Comment`
-- Django's built-in `User`
-
-### Authentication
-
-- registration by email/password
-- login by email/password
-- token creation
-- logout/token invalidation
-- email existence check
-
-Authenticated requests use:
+## Project Structure
 
 ```text
-Authorization: Token <token>
+.
+├── core/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── kan_mind_app/
+│   ├── api/
+│   │   ├── permissions.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── migrations/
+│   ├── tests/
+│   ├── admin.py
+│   ├── apps.py
+│   └── models.py
+├── postman/
+│   ├── KanMind.postman_collection.json
+│   └── POSTMAN.md
+├── manage.py
+└── requirements.txt
 ```
-
-### Permissions
-
-- API resources require authentication by default.
-- Users only see boards they own or belong to.
-- Board members may read boards.
-- Only the board owner may update or delete a board.
-- Tasks and comments are limited to accessible boards.
-- Task assignees/reviewers must belong to the selected board.
-- Comment authors are assigned from `request.user`.
-
-### Query filtering
-
-`GET /api/tasks/` supports:
-
-```text
-?board=<id>
-?status=to-do
-?priority=high
-?assignee=<user-id>
-?reviewer=<user-id>
-```
-
-Filters can be combined.
-
-`GET /api/comments/` supports:
-
-```text
-?task=<task-id>
-```
-
-## API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Purpose | Auth |
-| --- | --- | --- | --- |
-| POST | `/api/registration/` | Register and receive token | No |
-| POST | `/api/login/` | Login and receive token | No |
-| POST | `/api/logout/` | Invalidate current token | Yes |
-| POST | `/api/email-check/` | Check whether email exists | No |
-
-### Boards
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/api/boards/` | List accessible boards |
-| POST | `/api/boards/` | Create board |
-| GET | `/api/boards/<id>/` | Retrieve board |
-| PATCH | `/api/boards/<id>/` | Update board |
-| DELETE | `/api/boards/<id>/` | Delete board |
-
-Board ownership is derived from the authenticated user and cannot be supplied by the client.
-
-### Tasks
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/api/tasks/` | List/filter accessible tasks |
-| POST | `/api/tasks/` | Create task |
-| GET | `/api/tasks/<id>/` | Retrieve task |
-| PATCH | `/api/tasks/<id>/` | Update task |
-| DELETE | `/api/tasks/<id>/` | Delete task |
-
-Allowed status values:
-
-- `to-do`
-- `in-progress`
-- `review`
-- `done`
-
-Allowed priorities:
-
-- `low`
-- `medium`
-- `high`
-
-### Comments
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/api/comments/` | List/filter accessible comments |
-| POST | `/api/comments/` | Create comment |
-| GET | `/api/comments/<id>/` | Retrieve comment |
-| PATCH | `/api/comments/<id>/` | Update comment |
-| DELETE | `/api/comments/<id>/` | Delete comment |
-
-The comment author is derived from the authenticated user.
 
 ## Local Setup
+
+### 1. Clone and enter the repository
 
 ```bash
 git clone https://github.com/YvesGM/kanmind-backend-developer-academy.git
 cd kanmind-backend-developer-academy
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
 ```
 
-`rest_framework.authtoken` adds database tables, so run `python manage.py migrate` after pulling the Academy foundation branch.
+### 2. Create and activate a virtual environment
 
-Optional admin user:
+Linux / macOS:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+Windows PowerShell:
+
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Apply migrations
+
+```bash
+python manage.py migrate
+```
+
+### 5. Optional: create an admin user
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Admin:
+Admin panel:
 
 ```text
 http://127.0.0.1:8000/admin/
 ```
 
-## Authentication Examples
+### 6. Start the development server
+
+```bash
+python manage.py runserver
+```
+
+API base URL:
+
+```text
+http://127.0.0.1:8000/api/
+```
+
+## Authentication
+
+KanMind uses DRF token authentication.
+
+Authenticated requests require:
+
+```text
+Authorization: Token <token>
+```
 
 ### Registration
 
+```http
+POST /api/registration/
+```
+
 ```json
 {
-  "email": "user@example.com",
-  "password": "SecureExamplePassword123!",
-  "repeated_password": "SecureExamplePassword123!"
+  "fullname": "Example Username",
+  "email": "example@mail.de",
+  "password": "examplePassword",
+  "repeated_password": "examplePassword"
+}
+```
+
+Response:
+
+```json
+{
+  "token": "<token>",
+  "fullname": "Example Username",
+  "email": "example@mail.de",
+  "user_id": 123
 }
 ```
 
 ### Login
 
-```json
-{
-  "email": "user@example.com",
-  "password": "SecureExamplePassword123!"
-}
+```http
+POST /api/login/
 ```
 
-Successful registration/login returns a token and user summary.
+The response has the same flat authentication shape as registration.
 
-## Domain Examples
+### Frontend guest account
 
-### Create Board
+The supplied frontend uses a normal login request for its guest account. Create a matching Django user for the credentials configured in the frontend file:
 
-```json
-{
-  "title": "KanMind Testboard",
-  "members": [1, 2]
-}
+```text
+shared/js/config.js
 ```
 
-### Create Task
+The backend does not hard-code guest credentials.
 
-```json
-{
-  "title": "Implement login",
-  "description": "Build the authentication endpoint",
-  "board": 1,
-  "assignee": 1,
-  "reviewer": 2,
-  "status": "to-do",
-  "priority": "high",
-  "due_date": "2026-11-20"
-}
+## API Overview
+
+### User lookup
+
+```http
+GET /api/email-check/?email=<email>
 ```
 
-### Create Comment
+Authentication is required. Existing users are returned as:
 
 ```json
 {
-  "task": 1,
-  "content": "Implementation has started."
+  "id": 1,
+  "email": "max.mustermann@example.com",
+  "fullname": "Max Mustermann"
 }
 ```
+
+### Boards
+
+```text
+GET    /api/boards/
+POST   /api/boards/
+GET    /api/boards/<board_id>/
+PATCH  /api/boards/<board_id>/
+DELETE /api/boards/<board_id>/
+```
+
+Board list responses include:
+
+- `member_count`
+- `ticket_count`
+- `tasks_to_do_count`
+- `tasks_high_prio_count`
+- `owner_id`
+
+Board detail responses include nested members and tasks.
+
+Permissions:
+
+- owner or member: read board
+- owner or member: update board title/member list
+- owner only: delete board
+
+### Tasks
+
+```text
+POST   /api/tasks/
+PATCH  /api/tasks/<task_id>/
+DELETE /api/tasks/<task_id>/
+GET    /api/tasks/assigned-to-me/
+GET    /api/tasks/reviewing/
+```
+
+Task write requests use `assignee_id` and `reviewer_id`. Responses expose nested `assignee` and `reviewer` objects.
+
+Supported statuses:
+
+```text
+to-do
+in-progress
+review
+done
+```
+
+Supported priorities:
+
+```text
+low
+medium
+high
+```
+
+Task rules:
+
+- only board owners/members may create or update tasks
+- assignee and reviewer must belong to the board
+- the board relation cannot be changed by PATCH
+- only the task creator or board owner may delete a task
+
+### Comments
+
+```text
+GET    /api/tasks/<task_id>/comments/
+POST   /api/tasks/<task_id>/comments/
+DELETE /api/tasks/<task_id>/comments/<comment_id>/
+```
+
+The comment author is derived from the authenticated user. Only the comment author may delete the comment.
+
+## Database and Repository Hygiene
+
+The local SQLite database is intentionally ignored by Git.
+
+Also ignored:
+
+- virtual environments
+- `.env`
+- Python bytecode
+- editor-specific files
+
+The default development secret key is only a local fallback. Set a real key through:
+
+```bash
+export DJANGO_SECRET_KEY='your-development-key'
+```
+
+## Tests
+
+Run the Django test suite with:
+
+```bash
+python manage.py test
+```
+
+The project includes API tests for authentication, boards, tasks, comments, validation, and permissions.
+
+Before submission, verify the complete API against the Developer Akademie PM tests and the required coverage target.
 
 ## Postman
 
@@ -216,47 +280,30 @@ Import:
 postman/KanMind.postman_collection.json
 ```
 
-Human-readable sheet:
+The imported hierarchy is:
 
 ```text
-docs/POSTMAN.md
+Developer Academy
+└── KanMind
+    ├── Authentication
+    ├── Boards
+    ├── Tasks
+    ├── Comments
+    └── Negative Tests
 ```
 
-The collection stores the authentication token automatically after registration/login and sends it as `Authorization: Token {{token}}`.
-
-## Project Structure
+Detailed usage is documented in:
 
 ```text
-.
-├── kan-mind-db/
-├── kan_mind_app/
-│   ├── migrations/
-│   ├── admin.py
-│   ├── models.py
-│   ├── permissions.py
-│   ├── serializers.py
-│   ├── urls.py
-│   └── views.py
-├── docs/
-│   └── POSTMAN.md
-├── postman/
-│   └── KanMind.postman_collection.json
-├── manage.py
-└── requirements.txt
+postman/POSTMAN.md
 ```
 
-## Still intentionally pending
+## Frontend
 
-These areas depend on the official KanMind specification and are not guessed in advance:
+The supplied frontend repository is:
 
-- exact nested/enriched response structures
-- `SerializerMethodField` values and dashboard aggregations
-- dedicated `assigned-to-me` / `reviewing` endpoints
-- exact guest account provisioning
-- final registration/login response shape
-- final object-level permission matrix
-- frontend integration contract
-- pagination/limit-offset requirements
-- final automated test matrix
+```text
+YvesGM/dev-academy-project.KanMind
+```
 
-The API should be verified with Postman before frontend integration.
+The backend is intentionally kept in its own repository, as required by the Developer Akademie checklist.
