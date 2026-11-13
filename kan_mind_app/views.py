@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -140,7 +141,6 @@ class TaskListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         board = serializer.validated_data['board']
         if not is_board_member(self.request.user, board):
-            from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied('Board access denied.')
         serializer.save()
 
