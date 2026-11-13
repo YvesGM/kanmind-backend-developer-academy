@@ -124,6 +124,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     """Handle board CRUD according to the KanMind contract."""
 
     queryset = Board.objects.all()
+    serializer_class = BoardDetailSerializer
     permission_classes = [IsAuthenticated, BoardPermission]
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
