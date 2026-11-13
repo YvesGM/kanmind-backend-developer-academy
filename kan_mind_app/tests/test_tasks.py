@@ -63,3 +63,8 @@ class TaskAPITests(KanMindAPITestCase):
             f'/api/tasks/{task.id}/', {'status': 'done'}, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_outsider_cannot_create_task_on_board(self):
+        self.authenticate(self.outsider)
+        response = self.client.post('/api/tasks/', self.task_payload(), format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
