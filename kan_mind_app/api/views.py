@@ -24,6 +24,7 @@ from .serializers import (
     BoardUpdateResponseSerializer,
     BoardUpdateSerializer,
     CommentSerializer,
+    EmailQuerySerializer,
     LoginSerializer,
     RegistrationSerializer,
     TaskDashboardSerializer,
@@ -110,12 +111,11 @@ class EmailCheckView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        email = request.query_params.get('email', '').strip()
-        if not email:
-            return Response(
-                {'email': ['This query parameter is required.']},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        serializer = EmailQuerySerializer(
+            data={'email': request.query_params.get('email')}
+        )
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
         user = get_object_or_404(User, email__iexact=email)
         return Response(UserSummarySerializer(user).data)
 
@@ -183,12 +183,21 @@ class TaskViewSet(
         serializer.save(creator=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        self._check_create_board(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         task = task_queryset().get(pk=serializer.instance.pk)
         data = TaskDashboardSerializer(task).data
         return Response(data, status=status.HTTP_201_CREATED)
+
+    def _check_create_board(self, request):
+        board_id = request.data.get('board')
+        if board_id is None:
+            return
+        board = get_object_or_404(Board, pk=board_id)
+        if not is_board_member(request.user, board):
+            raise PermissionDenied('Board membership required.')
 
     def partial_update(self, request, *args, **kwargs):
         task = self.get_object()
