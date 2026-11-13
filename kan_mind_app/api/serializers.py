@@ -180,6 +180,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
             'board', 'title', 'description', 'status', 'priority',
             'assignee_id', 'reviewer_id', 'due_date',
         ]
+        extra_kwargs = {'due_date': {'required': True}}
 
     def validate_board(self, board):
         if self.instance:
