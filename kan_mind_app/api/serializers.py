@@ -82,6 +82,12 @@ class AuthResponseSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
 
 
+class EmailQuerySerializer(serializers.Serializer):
+    """Validate the email-check query parameter."""
+
+    email = serializers.EmailField()
+
+
 class BoardListSerializer(serializers.ModelSerializer):
     """Serialize board list and creation responses."""
 
@@ -185,8 +191,6 @@ class TaskWriteSerializer(serializers.ModelSerializer):
     def validate_board(self, board):
         if self.instance:
             raise serializers.ValidationError('Board cannot be changed.')
-        if not is_board_member(self.context['request'].user, board):
-            raise serializers.ValidationError('Board access denied.')
         return board
 
     def validate(self, attrs):
