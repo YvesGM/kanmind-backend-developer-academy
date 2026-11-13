@@ -10,7 +10,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models import Board, Comment, Task
-from .permissions import BoardPermission, IsCommentAuthor, TaskPermission, is_board_member
+from .permissions import (
+    BoardPermission,
+    IsCommentAuthor,
+    TaskPermission,
+    is_board_member,
+)
 from .serializers import (
     AuthResponseSerializer,
     BoardCreateSerializer,
@@ -126,9 +131,10 @@ class BoardViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return board_list_queryset(self.request.user)
         tasks = task_queryset().order_by('id')
-        return accessible_boards(self.request.user).select_related(
-            'owner'
-        ).prefetch_related('members', Prefetch('tasks', queryset=tasks))
+        return Board.objects.select_related('owner').prefetch_related(
+            'members',
+            Prefetch('tasks', queryset=tasks),
+        )
 
     def get_serializer_class(self):
         serializers = {
@@ -170,8 +176,7 @@ class TaskViewSet(
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
-        boards = accessible_boards(self.request.user)
-        return task_queryset().filter(board__in=boards)
+        return task_queryset()
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -209,7 +214,10 @@ class TaskCommentsView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_task(self):
-        task = get_object_or_404(Task.objects.select_related('board'), pk=self.kwargs['task_id'])
+        task = get_object_or_404(
+            Task.objects.select_related('board'),
+            pk=self.kwargs['task_id'],
+        )
         if not is_board_member(self.request.user, task.board):
             raise PermissionDenied('Board membership required.')
         return task
