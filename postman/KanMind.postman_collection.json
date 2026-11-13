@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "e406cb25-8826-4373-9a36-kanmind-foundation",
-    "name": "KanMind",
-    "description": "KanMind Academy Foundation API collection.",
+    "name": "Developer Academy",
+    "description": "Developer Academy API collection.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -39,503 +39,519 @@
       "value": "SecureExamplePassword123!"
     }
   ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "const token = pm.collectionVariables.get('token');",
-          "if (token) {",
-          "  pm.request.headers.upsert({",
-          "    key: 'Authorization',",
-          "    value: 'Token ' + token",
-          "  });",
-          "}"
-        ]
-      }
-    }
-  ],
   "item": [
     {
-      "name": "Authentication",
-      "item": [
+      "name": "KanMind",
+      "event": [
         {
-          "name": "Registration",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/registration/",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"{{password}}\",\\n  \"repeated_password\": \"{{password}}\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.request.headers.remove('Authorization');"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  if (body.token) pm.collectionVariables.set('token', body.token);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/login/",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"{{password}}\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.request.headers.remove('Authorization');"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  if (body.token) pm.collectionVariables.set('token', body.token);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Email Check",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/email-check/",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"email\": \"{{email}}\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.request.headers.remove('Authorization');"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": "{{baseUrl}}/logout/"
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const token = pm.collectionVariables.get('token');",
+              "if (token) {",
+              "  pm.request.headers.upsert({",
+              "    key: 'Authorization',",
+              "    value: 'Token ' + token",
+              "  });",
+              "}"
+            ]
           }
         }
-      ]
-    },
-    {
-      "name": "Boards",
+      ],
       "item": [
         {
-          "name": "List Boards",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/boards/"
-          }
-        },
-        {
-          "name": "Create Board",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/boards/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"title\": \"KanMind Testboard\",\\n  \"members\": []\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
+          "name": "Authentication",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  if (body.id) pm.collectionVariables.set('boardId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Board",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/boards/{{boardId}}/"
-          }
-        },
-        {
-          "name": "Patch Board",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/boards/{{boardId}}/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"title\": \"KanMind Backend Board\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "name": "Registration",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/registration/",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"repeated_password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Board",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/boards/{{boardId}}/"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Tasks",
-      "item": [
-        {
-          "name": "List Tasks",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/tasks/"
-          }
-        },
-        {
-          "name": "Filter Tasks",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/tasks/?board={{boardId}}&status=to-do&priority=high"
-          }
-        },
-        {
-          "name": "Create Task",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/tasks/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"title\": \"Implement login\",\\n  \"description\": \"Build the authentication endpoint\",\\n  \"board\": {{boardId}},\\n  \"assignee\": null,\\n  \"reviewer\": null,\\n  \"status\": \"to-do\",\\n  \"priority\": \"high\",\\n  \"due_date\": \"2026-11-20\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.request.headers.remove('Authorization');"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                      "}"
+                    ]
+                  }
                 }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  if (body.id) pm.collectionVariables.set('taskId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Task",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
-          }
-        },
-        {
-          "name": "Move Task",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/tasks/{{taskId}}/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"status\": \"in-progress\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Task",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/tasks/{{taskId}}/"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Comments",
-      "item": [
-        {
-          "name": "List Comments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/comments/"
-          }
-        },
-        {
-          "name": "Filter Comments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/comments/?task={{taskId}}"
-          }
-        },
-        {
-          "name": "Create Comment",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/comments/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"task\": {{taskId}},\\n  \"content\": \"Implementation has started.\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  if (body.id) pm.collectionVariables.set('commentId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Comment",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/comments/{{commentId}}/"
-          }
-        },
-        {
-          "name": "Patch Comment",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/comments/{{commentId}}/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"content\": \"Updated comment.\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Delete Comment",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/comments/{{commentId}}/"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Negative Tests",
-      "item": [
-        {
-          "name": "Invalid Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/login/",
-            "auth": {
-              "type": "noauth"
+              ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"email\": \"{{email}}\",\\n  \"password\": \"wrong-password\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/login/",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.request.headers.remove('Authorization');"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Email Check",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/email-check/",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.request.headers.remove('Authorization');"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Logout",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/logout/"
               }
             }
-          }
+          ]
         },
         {
-          "name": "Invalid Task Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "name": "Boards",
+          "item": [
+            {
+              "name": "List Boards",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/boards/"
               }
-            ],
-            "url": "{{baseUrl}}/tasks/{{taskId}}/",
-            "body": {
-              "mode": "raw",
-              "raw": "{\\n  \"status\": \"banana\"\\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            },
+            {
+              "name": "Create Board",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/boards/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"KanMind Testboard\",\n  \"members\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  if (body.id) pm.collectionVariables.set('boardId', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Board",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/boards/{{boardId}}/"
+              }
+            },
+            {
+              "name": "Patch Board",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/boards/{{boardId}}/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"KanMind Backend Board\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 }
               }
+            },
+            {
+              "name": "Delete Board",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/boards/{{boardId}}/"
+              }
             }
-          }
+          ]
         },
         {
-          "name": "Unknown Board",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/boards/999999/"
-          }
+          "name": "Tasks",
+          "item": [
+            {
+              "name": "List Tasks",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/tasks/"
+              }
+            },
+            {
+              "name": "Filter Tasks",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/tasks/?board={{boardId}}&status=to-do&priority=high"
+              }
+            },
+            {
+              "name": "Create Task",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/tasks/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Implement login\",\n  \"description\": \"Build the authentication endpoint\",\n  \"board\": \"{{boardId}}\",\n  \"assignee\": null,\n  \"reviewer\": null,\n  \"status\": \"to-do\",\n  \"priority\": \"high\",\n  \"due_date\": \"2026-11-20\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  if (body.id) pm.collectionVariables.set('taskId', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Task",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/tasks/{{taskId}}/"
+              }
+            },
+            {
+              "name": "Move Task",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/tasks/{{taskId}}/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in-progress\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Task",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/tasks/{{taskId}}/"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comments",
+          "item": [
+            {
+              "name": "List Comments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/comments/"
+              }
+            },
+            {
+              "name": "Filter Comments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/comments/?task={{taskId}}"
+              }
+            },
+            {
+              "name": "Create Comment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/comments/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"task\": \"{{taskId}}\",\n  \"content\": \"Implementation has started.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  if (body.id) pm.collectionVariables.set('commentId', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Comment",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/comments/{{commentId}}/"
+              }
+            },
+            {
+              "name": "Patch Comment",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/comments/{{commentId}}/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Updated comment.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Comment",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/comments/{{commentId}}/"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative Tests",
+          "item": [
+            {
+              "name": "Invalid Login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/login/",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.request.headers.remove('Authorization');"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Invalid Task Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/tasks/{{taskId}}/",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"banana\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Unknown Board",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/boards/999999/"
+              }
+            }
+          ]
         }
       ]
     }
