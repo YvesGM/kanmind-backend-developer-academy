@@ -12,6 +12,12 @@ env/
 db.sqlite3
 *.sqlite3
 
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
 # Environment
 .env
 
