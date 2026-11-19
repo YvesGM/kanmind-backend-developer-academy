@@ -8,7 +8,17 @@ SECRET_KEY = os.environ.get(
     'django-insecure-development-only-change-me',
 )
 DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+DEFAULT_ALLOWED_HOSTS = (
+    '127.0.0.1,localhost,yves-gildemeister.developerakademie.org'
+)
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS',
+        DEFAULT_ALLOWED_HOSTS,
+    ).split(',')
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
